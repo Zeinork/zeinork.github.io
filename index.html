@@ -12,6 +12,32 @@
 @media(max-width:900px){.wrap,.nav{padding-left:1.5rem;padding-right:1.5rem}.hero-grid{gap:2rem}.hero-art img{height:270px}.project{grid-template-columns:1fr 1fr}.project-body,.project-visual{padding:1.4rem}.support-grid{grid-template-columns:1fr 1fr}.about-grid{gap:2rem}}
 @media(max-width:650px){.nav{align-items:start;flex-direction:column}nav{gap:1rem}.hero{padding:2.5rem 0}.hero-grid,.project,.about-grid,.contact-grid,.experience-grid{grid-template-columns:1fr}.hero-grid{gap:2rem}h1{max-width:12ch;font-size:3.1rem}.hero-art img{height:280px}.section-head{align-items:start;flex-direction:column;gap:1rem}section{padding:2.8rem 0}.support-grid{grid-template-columns:1fr}.project-visual{min-height:250px}.photo img{height:240px}.about-grid,.contact-grid{gap:2rem}.index-strip{gap:.7rem 1.3rem}.project-body{padding:1.5rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* Subtle interaction and entrance motion */
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+nav a{position:relative;display:inline-block;transition:transform .22s cubic-bezier(.2,.8,.2,1),color .22s ease}
+nav a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;background:#ef2838;transform:scaleX(0);transform-origin:left;transition:transform .22s ease}
+nav a:focus-visible{transform:translateY(4px);outline:2px solid #ef2838;outline-offset:9px}
+nav a:focus-visible::after,nav a[aria-current="page"]::after{transform:scaleX(1)}
+.btn,.resume-list a{transition:transform .22s ease,box-shadow .22s ease,background-color .22s ease,color .22s ease}
+.project,.experience,.support{transition:transform .28s ease,box-shadow .28s ease}
+.project{overflow:hidden}
+.project-visual img,.hero-art img{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.btn:active{transform:translateY(1px) scale(.98)}
+:where(a,summary):focus-visible{outline:2px solid #ef2838;outline-offset:5px}
+@media(hover:hover) and (pointer:fine){
+ nav a:hover{transform:translateY(4px);color:#ef2838}
+ nav a:hover::after{transform:scaleX(1)}
+ .btn:hover,.resume-list a:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
+ .project:hover,.experience:hover,.support:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.09)}
+ .project:hover .project-visual img,.hero-art:hover img{transform:scale(1.025)}
+}
+.motion-pending{opacity:0;transform:translateY(18px)}
+.motion-reveal{transition:opacity .65s ease,transform .65s cubic-bezier(.2,.8,.2,1)}
+.motion-reveal.motion-shown{opacity:1;transform:translateY(0)}
+@keyframes portfolio-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:no-preference){.hero h1,.rover-intro h1{animation:portfolio-enter .65s ease both}.hero-art{animation:portfolio-enter .8s .1s ease both}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.motion-pending{opacity:1;transform:none}nav a:hover,nav a:focus-visible,.btn:hover,.btn:active,.resume-list a:hover,.project:hover,.experience:hover,.support:hover,.project:hover .project-visual img,.hero-art:hover img{transform:none}}
 </style>
 </head>
 <body>
@@ -31,4 +57,27 @@
 </div>
 <section class="contact" id="contact"><div class="wrap contact-grid"><div><div class="section-label">05 / CONTACT</div><h2>Let’s build something.</h2><p>Seeking summer 2027 internships in digital hardware/FPGA, robotics, and embedded systems.</p><a class="email" href="mailto:wlz@duke.edu">wlz@duke.edu</a><div class="social"><a href="https://github.com/Zeinork" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/wynton-zhang" target="_blank" rel="noopener noreferrer">LinkedIn</a></div></div><div><h3>Resume downloads</h3><p>Choose the version closest to your team’s work.</p><div class="resume-list"><a href="assets/Wynton_Zhang_Hardware_FPGA_Resume.pdf" download>Hardware / FPGA resume<small>Verilog, digital systems, and processor components · PDF</small></a><a href="assets/Wynton_Zhang_Robotics_Embedded_Resume.pdf" download>Robotics / embedded resume<small>Arm manipulation, sensor-based control, and CAD · PDF</small></a></div></div></div></section>
 </main><footer class="footer"><div class="wrap"><span>Wynton Zhang · Duke University</span><span>Engineering portfolio · 2026</span></div></footer>
+<script>
+(() => {
+  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (preference.matches || !('IntersectionObserver' in window)) return;
+  const targets = Array.from(document.querySelectorAll('main section')).filter(el => el.getBoundingClientRect().top > window.innerHeight);
+  const show = el => { el.classList.add('motion-shown'); el.classList.remove('motion-pending'); };
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => { if (entry.isIntersecting) { show(entry.target); observer.unobserve(entry.target); } });
+  }, {threshold: 0, rootMargin: '0px 0px -24px 0px'});
+  targets.forEach(el => { el.classList.add('motion-reveal', 'motion-pending'); observer.observe(el); });
+  const revealHash = () => {
+    if (!location.hash) return;
+    let target;
+    try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch { return; }
+    const section = target && (target.matches('section') ? target : target.closest('section'));
+    if (section) { show(section); observer.unobserve(section); }
+  };
+  window.addEventListener('hashchange', revealHash);
+  document.addEventListener('focusin', event => { const section = event.target.closest('section'); if (section) { show(section); observer.unobserve(section); } });
+  preference.addEventListener('change', event => { if(event.matches){targets.forEach(show);observer.disconnect();} });
+  revealHash();
+})();
+</script>
 </body></html>
