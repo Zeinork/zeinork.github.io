@@ -1,0 +1,9 @@
+Upload these contents at the TOP LEVEL of Zeinork/zeinork.github.io:
+
+index.html (replaces the current homepage)
+bse-rover.html (new page)
+assets/bse/ (new images and archived source)
+
+Open the extracted folder and drag its CONTENTS into Add file > Upload files. Do not upload the enclosing folder or ZIP. Existing assets and code folders stay in place. Commit to main and wait for the Pages deployment.
+
+Then open https://zeinork.github.io/ and select BSE Rover in the top navigation.
