@@ -1,1 +1,524 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Wynton Zhang — Source samples</title><style>body{max-width:850px;margin:3rem auto;padding:0 1.5rem;font:18px/1.7 system-ui;color:#111}a{color:#b51226}h1{line-height:1.2}</style><a href="../../">← Portfolio</a><h1>Source samples</h1><p>Read the README for scope, dependencies, and limitations.</p><ul><li><a href="README.md">README.md</a></li><li><a href="lab05_m5_detour_samples.py">lab05_m5_detour_samples.py</a></li><li><a href="lab05_motion_planner_samples.py">lab05_motion_planner_samples.py</a></li><li><a href="lab06_pick_and_place_samples.py">lab06_pick_and_place_samples.py</a></li></ul></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Selected source files from Wynton Zhang's engineering portfolio."><title>Manipulation tasks — Wynton Zhang</title><link rel="icon" href="../../assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="../../signal.css"></head><body><a class="skip" href="#main">Skip to content</a><header class="site-head"><div class="wrap head-grid"><a class="identity" href="../../index.html" aria-label="Wynton Zhang, home"><img src="../../assets/mark.svg" width="36" height="36" alt=""><span>Wynton Zhang<small>Engineering portfolio</small></span></a><nav class="nav" aria-label="Main navigation"><a href="../../index.html#projects">Work</a><a href="../../index.html#code" aria-current="page">Code</a><a href="../../index.html#experience">Experience</a><a href="../../bse-rover.html">BSE Rover</a></nav><a class="button head-action" href="../../index.html#contact">Resume &amp; contact</a></div></header><main id="main" class="wrap section"><div class="section-head"><div><p class="kicker"><span>02</span> PYTHON / ROS 2</p><h2>Manipulation tasks<span>.</span></h2></div><p>Selected manipulation methods from my course projects. Provided arm and simulation helpers are needed to run them.</p></div><div class="actions"><a class="button primary" href="../../assets/code/robotics-task-samples.zip" download>Download samples (ZIP)</a><a class="button outline" href="../../index.html#code">Back to source samples</a></div><details class="source-box"><summary>README.md</summary><pre tabindex="0"><code># Wynton Zhang — ROS 2 manipulation code samples
+
+Selected task-method excerpts from completed course-scaffold extensions for simulated Kinova Gen3 Lite manipulation.
+
+- lab05_motion_planner_samples.py: Cartesian segments, collision-scene changes, gripper-position checks.
+- lab05_m5_detour_samples.py: baseline/detour experiment using recorded trajectory points and forward kinematics.
+- lab06_pick_and_place_samples.py: placement, stacking, grasp checking, and stop-on-miss recovery.
+
+These files are for source inspection. They require their original class context, constants, imports, ROS 2, pymoveit2, and course-provided arm/simulation helpers. They are not standalone runnable scripts. Original scaffolds and instructor helper implementations are intentionally excluded.
+
+The grasp threshold is an implementation choice in the uploaded version; this package does not establish repeated recovery performance or threshold calibration. The project runs in simulation; no physical robot result is claimed.
+</code></pre></details><details class="source-box"><summary>lab05_motion_planner_samples.py</summary><pre tabindex="0"><code># Task-method excerpts from motion_planner.py
+# Requires the original class context and ROS 2 / MoveIt helper APIs.
+# Not a standalone executable. Supplied framework code is omitted.
+
+class TaskMethodSamples:
+    def run_milestone_2(self) -&gt; None:
+        self.get_logger().info(&quot;Milestone 2: Cartesian motion&quot;)
+
+        current_pose = self.moveit2.compute_fk()
+        if current_pose is None:
+            self.get_logger().error(&quot;Could not read the current pose.&quot;)
+            return
+
+        # First move 20 cm upward.
+        target_1 = copy.deepcopy(current_pose.pose)
+        target_1.position.z += 0.20
+
+        # Then move 10 cm sideways from the first target.
+        target_2 = copy.deepcopy(target_1)
+        target_2.position.y += 0.10
+
+        self.pen.down()
+
+        try:
+            for segment, target in enumerate([target_1, target_2], start=1):
+                trajectory = self.moveit2.plan(
+                    pose=target,
+                    cartesian=True,
+                    max_step=0.005,
+                    cartesian_fraction_threshold=0.9,
+                )
+
+                if trajectory is None:
+                    self.get_logger().error(
+                        f&quot;Segment {segment} planning failed; stopping.&quot;
+                    )
+                    return
+
+                self.moveit2.execute(trajectory)
+
+                if not self.moveit2.wait_until_executed():
+                    self.get_logger().error(
+                        f&quot;Segment {segment} execution failed; stopping.&quot;
+                    )
+                    return
+
+                self.get_logger().info(f&quot;Segment {segment} completed.&quot;)
+
+        finally:
+            self.pen.up()
+    def run_milestone_3(self) -&gt; None:
+        self.get_logger().info(&quot;Milestone 3: the planning scene&quot;)
+
+        if self.retract_joints is None:
+            self.get_logger().error(
+                &quot;Retract pose is not set. Run motion_planner 1 3.&quot;
+            )
+            return
+
+        self.pen.up()
+        self.moveit2.remove_collision_object(&quot;blocker&quot;)
+        time.sleep(1.0)
+
+        self.get_logger().info(&quot;Moving to Home.&quot;)
+        if not self.move_to_joints(HOME):
+            self.get_logger().error(&quot;Could not reach Home; stopping.&quot;)
+            return
+
+        retract_pose = self.moveit2.compute_fk(
+            joint_state=self.retract_joints
+        )
+
+        if retract_pose is None:
+            self.get_logger().error(&quot;Could not calculate the retract pose.&quot;)
+            return
+
+        position = retract_pose.pose.position
+
+        self.moveit2.add_collision_box(
+            id=&quot;blocker&quot;,
+            size=(0.10, 0.10, 0.10),
+            position=(position.x, position.y, position.z),
+            quat_xyzw=(0.0, 0.0, 0.0, 1.0),
+            frame_id=&quot;base_link&quot;,
+        )
+
+        try:
+            time.sleep(1.0)
+
+            self.get_logger().info(
+                &quot;Box added at Retract. Capture the screenshot &quot;
+                &quot;while the following planning attempts fail.&quot;
+            )
+
+            blocked_result = self.move_to_joints(self.retract_joints)
+
+            if not blocked_result:
+                self.get_logger().info(
+                    &quot;With blocker: motion failed as expected. &quot;
+                    &quot;Check the MoveIt terminal for the planning reason.&quot;
+                )
+            else:
+                self.get_logger().error(
+                    &quot;With blocker: motion unexpectedly succeeded. &quot;
+                    &quot;Check the box placement and size.&quot;
+                )
+
+            self.get_logger().info(
+                &quot;Keeping the box visible for 10 seconds.&quot;
+            )
+            time.sleep(10.0)
+
+        finally:
+            self.moveit2.remove_collision_object(&quot;blocker&quot;)
+            time.sleep(1.0)
+
+        self.get_logger().info(&quot;Box removed. Trying Retract again.&quot;)
+        clear_result = self.move_to_joints(self.retract_joints)
+
+        if clear_result:
+            self.get_logger().info(
+                &quot;Without blocker: motion to Retract succeeded.&quot;
+            )
+        else:
+            self.get_logger().error(
+                &quot;Without blocker: motion still failed; check MoveIt.&quot;
+            )
+    def run_milestone_4(self) -&gt; None:
+        self.get_logger().info(&quot;Milestone 4: gripper control&quot;)
+
+        for label, command, target in [
+            (&quot;Open&quot;, self.gripper.open, 0.0),
+            (&quot;Close&quot;, self.gripper.close, 0.8),
+        ]:
+            self.get_logger().info(
+                f&quot;{label}: commanding finger position {target:.2f}&quot;
+            )
+
+            command()
+            self.gripper.wait_until_executed()
+            time.sleep(0.5)
+
+            measured = self.joint_position(GRIPPER_JOINT)
+
+            if measured is None:
+                self.get_logger().error(
+                    f&quot;{label}: FAIL — no measured finger position available.&quot;
+                )
+                continue
+
+            error = abs(measured - target)
+            passed = error &lt;= 0.05
+
+            message = (
+                f&quot;{label}: commanded={target:.3f}, &quot;
+                f&quot;measured={measured:.3f}, &quot;
+                f&quot;error={error:.3f}, &quot;
+                f&quot;within 0.05: {&#x27;PASS&#x27; if passed else &#x27;FAIL&#x27;}&quot;
+            )
+
+            if passed:
+                self.get_logger().info(message)
+            else:
+                self.get_logger().error(message)
+</code></pre></details><details class="source-box"><summary>lab05_m5_detour_samples.py</summary><pre tabindex="0"><code># Task-method excerpts from m5_detour.py
+# Requires the original class context and ROS 2 / MoveIt helper APIs.
+# Not a standalone executable. Supplied framework code is omitted.
+
+class TaskMethodSamples:
+    def run(self) -&gt; None:
+        start = HOME
+        goal = [0.90, 0.55, 2.10, -1.10, -0.90, -0.60]
+
+        box_size = (0.08, 0.08, 0.08)
+        path_fraction = 0.50
+
+        self.pen.up()
+        self.moveit2.remove_collision_object(&quot;detour_box&quot;)
+        self.moveit2.remove_collision_object(&quot;blocker&quot;)
+        time.sleep(1.0)
+        self.pen.clear()
+
+        try:
+            self.get_logger().info(&quot;Moving to the starting configuration.&quot;)
+            if not self.move_to_joints(start):
+                return
+
+            # First motion: no obstacle, blue trail.
+            self.pen.set_color(0.1, 0.3, 0.9)
+            self.pen.down()
+
+            started = time.time()
+            baseline_ok = self.move_to_joints(goal)
+            baseline_duration = time.time() - started
+            baseline_attempts = self.last_attempts
+            baseline_trajectory = self.last_trajectory
+
+            self.pen.up()
+
+            self.get_logger().info(
+                f&quot;NO OBSTACLE: success={baseline_ok}, &quot;
+                f&quot;planning_attempts={baseline_attempts}, &quot;
+                f&quot;duration={baseline_duration:.2f} s&quot;
+            )
+
+            if not baseline_ok:
+                self.get_logger().error(
+                    &quot;The baseline failed. Fix it before adding an obstacle.&quot;
+                )
+                return
+
+            # Locate an interior point of the trajectory just executed.
+            points = baseline_trajectory.points
+            if len(points) &lt; 3:
+                self.get_logger().error(
+                    &quot;Too few trajectory points to choose an interior point.&quot;
+                )
+                return
+
+            index = int((len(points) - 1) * path_fraction)
+            index = max(1, min(index, len(points) - 2))
+
+            positions_by_name = dict(zip(
+                baseline_trajectory.joint_names,
+                points[index].positions,
+            ))
+            middle_joints = [
+                positions_by_name[name] for name in ARM_JOINTS
+            ]
+
+            middle_pose = self.moveit2.compute_fk(
+                joint_state=middle_joints
+            )
+
+            if middle_pose is None:
+                self.get_logger().error(
+                    &quot;Could not calculate the obstacle position.&quot;
+                )
+                return
+
+            p = middle_pose.pose.position
+            box_position = (p.x, p.y, p.z)
+
+            # Return before adding the box. Do not draw the return trip.
+            self.get_logger().info(&quot;Returning to the same start, pen up.&quot;)
+            if not self.move_to_joints(start):
+                return
+
+            self.moveit2.add_collision_box(
+                id=&quot;detour_box&quot;,
+                size=box_size,
+                position=box_position,
+                quat_xyzw=(0.0, 0.0, 0.0, 1.0),
+                frame_id=&quot;base_link&quot;,
+            )
+            time.sleep(1.0)
+
+            self.get_logger().info(
+                f&quot;Box center: x={p.x:.3f}, y={p.y:.3f}, z={p.z:.3f}; &quot;
+                f&quot;size={box_size} m&quot;
+            )
+
+            # Second motion: same start and goal, red trail.
+            self.pen.set_color(0.9, 0.1, 0.1)
+            self.pen.down()
+
+            started = time.time()
+            detour_ok = self.move_to_joints(goal)
+            detour_duration = time.time() - started
+            detour_attempts = self.last_attempts
+
+            self.pen.up()
+
+            self.get_logger().info(
+                f&quot;WITH OBSTACLE: success={detour_ok}, &quot;
+                f&quot;planning_attempts={detour_attempts}, &quot;
+                f&quot;duration={detour_duration:.2f} s&quot;
+            )
+
+            if detour_ok:
+                self.get_logger().info(
+                    &quot;Both motions succeeded. Check that the red trail &quot;
+                    &quot;visibly avoids the box and differs from the blue trail.&quot;
+                )
+            else:
+                self.get_logger().warn(
+                    &quot;Detour failed. Check whether the box blocks the start, &quot;
+                    &quot;goal, or all routes; reduce or reposition it.&quot;
+                )
+
+            self.get_logger().info(
+                &quot;SCREENSHOT NOW: keeping the box visible for 30 seconds.&quot;
+            )
+            time.sleep(30.0)
+
+        finally:
+            self.pen.up()
+            self.moveit2.remove_collision_object(&quot;detour_box&quot;)
+            time.sleep(1.0)
+            self.get_logger().info(&quot;Detour box removed.&quot;)
+</code></pre></details><details class="source-box"><summary>lab06_pick_and_place_samples.py</summary><pre tabindex="0"><code># Task-method excerpts from pick_and_place.py
+# Requires the original class context and ROS 2 / MoveIt helper APIs.
+# Not a standalone executable. Supplied framework code is omitted.
+
+class TaskMethodSamples:
+    def place(self, block_id: str, x: float, y: float, layer: int) -&gt; bool:
+        &quot;&quot;&quot;Place the held block on top of `layer` blocks.&quot;&quot;&quot;
+        release_z = GRASP_HEIGHT + layer * BLOCK_SIZE + PLACE_CLEARANCE
+
+        # 1. Carry the block above the destination.
+        if not self.move_to_pose(x, y, APPROACH_HEIGHT):
+            return False
+
+        # 2. Lower it slowly in a straight line.
+        if not self.move_to_pose(
+            x, y, release_z,
+            cartesian=True,
+            speed=PLACE_SPEED,
+        ):
+            return False
+
+        # 3. Release the block before detaching it in MoveIt.
+        self.open_gripper()
+        self.moveit2.detach_collision_object(block_id)
+        time.sleep(0.5)
+
+        # 4. Lift the empty gripper straight up.
+        if not self.move_to_pose(
+            x, y, APPROACH_HEIGHT,
+            cartesian=True,
+        ):
+            return False
+
+        return True
+    def run_milestone_2(self) -&gt; None:
+        &quot;&quot;&quot;Pick block_1 and place it on top of block_2.&quot;&quot;&quot;
+        log = self.get_logger()
+        log.info(&quot;Milestone 2: two-block stack&quot;)
+
+        if not self.start():
+            return
+
+        reset_blocks(self, self.moveit2)
+
+        # Pick the red block from its starting position.
+        x, y = BLOCKS[&quot;block_1&quot;][1]
+        if self.pick(&quot;block_1&quot;, x, y) is None:
+            log.error(&quot;Milestone 2: the pick did not finish.&quot;)
+            return
+
+        # Place it above the blue block: one block below it.
+        tower_x, tower_y = TOWER_XY
+        if not self.place(&quot;block_1&quot;, tower_x, tower_y, layer=1):
+            log.error(&quot;Milestone 2: the place did not finish.&quot;)
+            return
+
+        self.move_to_joints(WORK)
+        log.info(&quot;Milestone 2 done.&quot;)
+    def run_milestone_3(self) -&gt; None:
+        &quot;&quot;&quot;Stack block_1 and then block_3 on block_2.&quot;&quot;&quot;
+        log = self.get_logger()
+        log.info(&quot;Milestone 3: three-block tower&quot;)
+
+        if not self.start():
+            return
+
+        reset_blocks(self, self.moveit2)
+
+        order = (&quot;block_1&quot;, &quot;block_3&quot;)
+        tower_x, tower_y = TOWER_XY
+        placed = 0
+
+        for layer, block_id in enumerate(order, start=1):
+            x, y = BLOCKS[block_id][1]
+
+            log.info(
+                f&quot;Picking {block_id} at ({x:.3f}, {y:.3f}); &quot;
+                f&quot;placing on layer {layer}.&quot;
+            )
+
+            if self.pick(block_id, x, y) is None:
+                log.error(
+                    f&quot;Pick failed for {block_id}. &quot;
+                    f&quot;{placed} of {len(order)} blocks were placed.&quot;
+                )
+                return
+
+            if not self.place(block_id, tower_x, tower_y, layer):
+                log.error(
+                    f&quot;Place failed for {block_id}. &quot;
+                    f&quot;{placed} of {len(order)} blocks were placed.&quot;
+                )
+                return
+
+            placed += 1
+
+        log.info(f&quot;{placed} of {len(order)} blocks were placed.&quot;)
+        self.move_to_joints(WORK)
+        log.info(&quot;Milestone 3 done.&quot;)
+    def pick_checked(self, block_id: str, x: float, y: float) -&gt; float | None:
+        &quot;&quot;&quot;Check the grasp before attaching; retreat and stop on a miss.&quot;&quot;&quot;
+        log = self.get_logger()
+        threshold = 0.64
+
+        # Approach above the block.
+        if not self.move_to_pose(x, y, APPROACH_HEIGHT):
+            log.error(f&quot;{block_id}: approach failed.&quot;)
+            return None
+
+        self.open_gripper()
+
+        # Descend straight down.
+        if not self.move_to_pose(x, y, GRASP_HEIGHT, cartesian=True):
+            log.error(f&quot;{block_id}: descent failed.&quot;)
+            return None
+
+        reading = self.close_gripper()
+
+        if reading is None:
+            log.error(
+                f&quot;{block_id}: no finger reading. &quot;
+                &quot;Stopping without attaching.&quot;
+            )
+            return None
+
+        # Decide BEFORE attaching or planning the lift.
+        holding_block = 0.0 &lt;= reading &lt; threshold
+
+        if not holding_block:
+            log.warning(
+                f&quot;{block_id}: grasp rejected, reading={reading:.3f}, &quot;
+                f&quot;threshold={threshold:.3f}. No block attached.&quot;
+            )
+
+            # Recovery: open, retreat straight up, and stop at WORK.
+            self.open_gripper()
+
+            if not self.move_to_pose(
+                x, y, APPROACH_HEIGHT, cartesian=True
+            ):
+                log.error(&quot;Recovery retreat failed; stopping.&quot;)
+                return None
+
+            if not self.move_to_joints(WORK):
+                log.error(&quot;Recovery move to WORK failed; stopping.&quot;)
+                return None
+
+            log.info(&quot;Recovery complete: stopped at WORK.&quot;)
+            return None
+
+        log.info(
+            f&quot;{block_id}: grasp accepted, reading={reading:.3f}, &quot;
+            f&quot;threshold={threshold:.3f}. Attaching block.&quot;
+        )
+
+        self.moveit2.attach_collision_object(
+            block_id, &quot;end_effector_link&quot;, TOUCH_LINKS
+        )
+        time.sleep(0.5)
+
+        # Lift only after a successful grasp check.
+        if not self.move_to_pose(
+            x, y, APPROACH_HEIGHT, cartesian=True
+        ):
+            log.error(f&quot;{block_id}: lift failed.&quot;)
+            return None
+
+        return reading
+    def run_milestone_4(self) -&gt; None:
+        &quot;&quot;&quot;Build the tower with grasp checking and stop-on-miss recovery.&quot;&quot;&quot;
+        log = self.get_logger()
+        log.info(&quot;Milestone 4: threshold=0.64; recovery=stop at WORK&quot;)
+
+        if not self.start():
+            return
+
+        # Do NOT reset here: preserve the deliberately nudged block.
+        order = (&quot;block_1&quot;, &quot;block_3&quot;)
+        tower_x, tower_y = TOWER_XY
+        placed = 0
+
+        for layer, block_id in enumerate(order, start=1):
+            x, y = BLOCKS[block_id][1]
+
+            log.info(
+                f&quot;Picking {block_id} at ({x:.3f}, {y:.3f}); &quot;
+                f&quot;target layer={layer}.&quot;
+            )
+
+            if self.pick_checked(block_id, x, y) is None:
+                log.error(
+                    f&quot;Milestone 4 stopped during pick of {block_id}. &quot;
+                    f&quot;{placed} of {len(order)} blocks were placed.&quot;
+                )
+                return
+
+            if not self.place(block_id, tower_x, tower_y, layer):
+                log.error(
+                    f&quot;Place failed for {block_id}. &quot;
+                    f&quot;{placed} of {len(order)} blocks were placed.&quot;
+                )
+                return
+
+            placed += 1
+            log.info(f&quot;{placed} of {len(order)} blocks were placed.&quot;)
+
+        if not self.move_to_joints(WORK):
+            log.error(&quot;Return to WORK failed.&quot;)
+            return
+
+        log.info(&quot;Milestone 4 done.&quot;)
+</code></pre></details></main><footer class="foot rover-foot"><div class="wrap mono"><span>© 2026 Wynton Zhang</span><a href="../../index.html">Back to portfolio</a></div></footer></body></html>

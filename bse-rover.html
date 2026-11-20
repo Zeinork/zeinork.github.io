@@ -1,37 +1,72 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BSE Rover | Wynton Zhang</title><meta name="description" content="Wynton Zhang's Raspberry Pi rover project: camera-based color detection, ultrasonic sensing, and motor control."><style>
-:root{--navy:#111111;--ink:#191919;--paper:#ffffff;--muted:#5e5e5e;--line:#dedede;--lime:#d91f30;--blue:#b91c2b;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Inter,Arial,Helvetica,sans-serif}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:5rem}body{margin:0;background:var(--paper);color:var(--ink);font:1rem/1.65 var(--sans)}a{color:inherit;text-underline-offset:4px}button,a,summary{-webkit-tap-highlight-color:transparent}a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:5px}.skip{position:absolute;left:1rem;top:-5rem;background:var(--lime);color:var(--navy);padding:.7rem;z-index:10}.skip:focus{top:1rem}header{background:var(--navy);color:white;border-bottom:1px solid #ffffff26}.nav{max-width:1240px;margin:auto;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}.wordmark{font-size:1.1rem;font-weight:800;text-decoration:none;letter-spacing:-.03em}.wordmark span{color:var(--lime)}nav{display:flex;gap:1.5rem;flex-wrap:wrap}nav a{font-size:.9rem;text-decoration:none;color:#e0e0e0}nav a:hover{color:var(--lime)}.wrap{max-width:1240px;margin:auto;padding:0 3rem}.hero{background:var(--navy);color:#fff;padding:4.7rem 0 4rem}.hero-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:4rem;align-items:center}.eyebrow{font-family:var(--mono);font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.hero .eyebrow{color:#ffffff}h1{font-size:clamp(2.7rem,5.3vw,4.9rem);line-height:1.06;letter-spacing:-.055em;margin:1rem 0 1.6rem;max-width:11ch}h1 span{color:var(--lime)}.hero p{color:#cccccc;max-width:43ch;font-size:1.12rem}.actions{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.7rem}.btn{display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1.15rem;border:1px solid currentColor;border-radius:3px;font-size:.95rem;font-weight:700;text-decoration:none;transition:background .2s,color .2s}.btn-primary{background:var(--lime);color:#ffffff;border-color:var(--lime)}.btn-primary:hover{background:#c81e2c;border-color:#c81e2c;color:white}.btn-light{color:#fff}.btn-light:hover{background:#ffffff15}.hero-note{font-family:var(--mono);font-size:.8rem!important;margin-top:1.4rem}.hero-art{margin:0;border:1px solid #ffffff35;background:#202020;position:relative}.hero-art img{display:block;width:100%;height:305px;object-fit:cover;object-position:24% 64%}.hero-art figcaption{padding:.9rem 1rem;color:#dddddd;font-family:var(--mono);font-size:.8rem;border-top:1px solid #ffffff35}.artifact-tag{position:absolute;top:.8rem;left:.8rem;background:var(--lime);color:#fff;padding:.2rem .55rem;font: .75rem var(--mono)}.index-strip{display:flex;gap:1.5rem;border-bottom:1px solid var(--line);padding:1.1rem 0;flex-wrap:wrap}.index-strip span{font-family:var(--mono);font-size:.8rem;color:var(--muted)}.index-strip strong{color:var(--ink)}section{padding:4rem 0}section+section{border-top:1px solid var(--line)}.section-head{display:flex;justify-content:space-between;align-items:end;gap:2rem;margin-bottom:2rem}.section-head p{max-width:43ch;color:var(--muted);margin:0}.section-label{font: .85rem var(--mono);color:var(--blue);margin-bottom:.65rem}h2{font-size:2.25rem;line-height:1.15;letter-spacing:-.045em;margin:0}h3{font-size:1.6rem;line-height:1.25;letter-spacing:-.035em;margin:.4rem 0 .85rem}.project{display:grid;grid-template-columns:.9fr 1.1fr;background:white;border:1px solid var(--line);margin-bottom:1.4rem}.project-visual{background:#f1f1f1;padding:2rem;display:flex;align-items:center;justify-content:center;min-width:0}.project-body{padding:2rem}.project-body p{margin:.75rem 0;color:var(--muted)}.status{display:inline-block;font: .75rem var(--mono);padding:.25rem .45rem;color:var(--blue);background:#fcecef}.tags{display:flex;gap:.45rem;flex-wrap:wrap;margin:1rem 0}.tags span{font: .8rem var(--mono);background:#f2f2f2;color:#555555;padding:.25rem .5rem}.project ul{padding-left:1.2rem;margin:1rem 0;color:var(--ink)}.project li{margin:.4rem 0}.diagram{width:100%;font-family:var(--mono)}.diagram text{font-size:13px;fill:#191919}.diagram .small{font-size:11px;fill:#5e5e5e}.diagram rect{fill:white;stroke:#858585;stroke-width:1.2}.diagram .core{fill:#111111;stroke:#111111}.diagram .coretext{fill:white}.diagram path{stroke:#858585;stroke-width:1.5;fill:none}.visual-caption{font:.8rem var(--mono);color:var(--muted);margin-top:1rem}.project figure{margin:0;width:100%}.project img{width:100%;display:block;border:1px solid #c8c8c8}.project-visual.photo{padding:1.3rem}.photo img{height:290px;object-fit:cover;object-position:75% 45%}details{border-top:1px solid var(--line);padding-top:.8rem;margin-top:1.2rem}summary{cursor:pointer;font-size:.9rem;font-weight:700;color:var(--blue);padding:.2rem 0}details p{font-size:.94rem}.support-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.support{border-top:3px solid var(--ink);padding:1.2rem 0}.support h3{font-size:1.25rem}.support p{color:var(--muted);margin:.5rem 0}.support .eyebrow{font-size:.75rem}.experience-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem 2rem}.experience{border-bottom:1px solid var(--line);padding-bottom:1.4rem}.experience h3{font-size:1.2rem;margin:.35rem 0}.experience .role{font-weight:700}.experience p{color:var(--muted);margin:.5rem 0}.date{font:.8rem var(--mono);color:var(--muted)}.about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:4rem}.about-grid p{color:var(--muted)}.skill-group{padding:.7rem 0;border-bottom:1px solid var(--line)}.skill-group strong{display:block;font-size:.9rem}.skill-group p{margin:.25rem 0}.course{font-size:.94rem}.contact{background:var(--navy);color:white}.contact .section-label{color:#ffffff}.contact p{color:#cccccc}.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem}.resume-list{display:grid;gap:.75rem;margin-top:1.5rem}.resume-list a{display:block;padding:.8rem 1rem;border:1px solid #ffffff45;text-decoration:none}.resume-list a:hover{border-color:var(--lime);color:var(--lime)}.resume-list small{display:block;color:#cccccc;font-size:.85rem}.social{display:flex;gap:1.4rem;margin-top:1.8rem}.email{font-size:clamp(1.4rem,3vw,2.3rem);font-weight:700;letter-spacing:-.03em}.footer{background:var(--navy);color:#cccccc;border-top:1px solid #ffffff26;padding:1.3rem 0;font:.8rem var(--mono)}.footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-@media(max-width:900px){.wrap,.nav{padding-left:1.5rem;padding-right:1.5rem}.hero-grid{gap:2rem}.hero-art img{height:270px}.project{grid-template-columns:1fr 1fr}.project-body,.project-visual{padding:1.4rem}.support-grid{grid-template-columns:1fr 1fr}.about-grid{gap:2rem}}
-@media(max-width:650px){.nav{align-items:start;flex-direction:column}nav{gap:1rem}.hero{padding:2.5rem 0}.hero-grid,.project,.about-grid,.contact-grid,.experience-grid{grid-template-columns:1fr}.hero-grid{gap:2rem}h1{max-width:12ch;font-size:3.1rem}.hero-art img{height:280px}.section-head{align-items:start;flex-direction:column;gap:1rem}section{padding:2.8rem 0}.support-grid{grid-template-columns:1fr}.project-visual{min-height:250px}.photo img{height:240px}.about-grid,.contact-grid{gap:2rem}.index-strip{gap:.7rem 1.3rem}.project-body{padding:1.5rem}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
-
-.rover-intro{padding:70px 0 30px}.rover-intro h1{font-size:clamp(2.4rem,6vw,4.5rem)}.video{aspect-ratio:16/9;margin-top:24px}.video iframe{width:100%;height:100%;border:0}.rover-media{width:100%;height:auto;display:block;max-height:650px;object-fit:contain;background:#fff}.rover-table{width:100%;border-collapse:collapse}.rover-table th,.rover-table td{text-align:left;padding:14px;border-bottom:1px solid #ddd}.source{max-height:550px;overflow:auto;background:#111;color:#fff;padding:24px;font-size:14px;line-height:1.6;white-space:pre}.rover-note{border-left:3px solid #ef2838;padding-left:20px}nav [aria-current=page]{color:#b51226}@media(max-width:650px){.rover-table th,.rover-table td{padding:10px 6px}.rover-intro{padding-top:40px}}
-/* Subtle interaction and entrance motion */
-html{scroll-behavior:smooth;scroll-padding-top:100px}
-nav a{position:relative;display:inline-block;transition:transform .22s cubic-bezier(.2,.8,.2,1),color .22s ease}
-nav a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;background:#ef2838;transform:scaleX(0);transform-origin:left;transition:transform .22s ease}
-nav a:focus-visible{transform:translateY(4px);outline:2px solid #ef2838;outline-offset:9px}
-nav a:focus-visible::after,nav a[aria-current="page"]::after{transform:scaleX(1)}
-.btn,.resume-list a{transition:transform .22s ease,box-shadow .22s ease,background-color .22s ease,color .22s ease}
-.project,.experience,.support{transition:transform .28s ease,box-shadow .28s ease}
-.project{overflow:hidden}
-.project-visual img,.hero-art img{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
-.btn:active{transform:translateY(1px) scale(.98)}
-:where(a,summary):focus-visible{outline:2px solid #ef2838;outline-offset:5px}
-@media(hover:hover) and (pointer:fine){
- nav a:hover{transform:translateY(4px);color:#ef2838}
- nav a:hover::after{transform:scaleX(1)}
- .btn:hover,.resume-list a:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,.12)}
- .project:hover,.experience:hover,.support:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(0,0,0,.09)}
- .project:hover .project-visual img,.hero-art:hover img{transform:scale(1.025)}
-}
-.motion-pending{opacity:0;transform:translateY(18px)}
-.motion-reveal{transition:opacity .65s ease,transform .65s cubic-bezier(.2,.8,.2,1)}
-.motion-reveal.motion-shown{opacity:1;transform:translateY(0)}
-@keyframes portfolio-enter{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:no-preference){.hero h1,.rover-intro h1{animation:portfolio-enter .65s ease both}.hero-art{animation:portfolio-enter .8s .1s ease both}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.motion-pending{opacity:1;transform:none}nav a:hover,nav a:focus-visible,.btn:hover,.btn:active,.resume-list a:hover,.project:hover,.experience:hover,.support:hover,.project:hover .project-visual img,.hero-art:hover img{transform:none}}
-</style></head><body><a class="skip" href="#main">Skip to content</a><header><div class="nav"><a class="wordmark" href="index.html#">Wynton Zhang<span>.</span></a><nav aria-label="Main navigation"><a href="index.html#projects">Projects</a><a href="index.html#code">Code</a><a href="index.html#experience">Experience</a><a href="index.html#about">About</a><a href="index.html#contact">Resume & contact</a><a href="bse-rover.html" aria-current="page">BSE Rover</a></nav></div></header><main id="main" class="wrap"><section class="rover-intro"><div class="eyebrow">BLUESTAMP ENGINEERING / 2023</div><h1>A rover that reacts<br>to what it sees.</h1><p>Built a Raspberry Pi rover combining camera-based color detection, ultrasonic proximity sensing, and motor control. The original project, called Dingo, explored directing a moving robot with a colored object.</p><div class="actions"><a class="btn btn-primary" href="#demos">Watch demonstrations</a><a class="btn" href="#source">Explore source</a></div></section><section><div class="section-head"><div><div class="section-label">PROJECT / OVERVIEW</div><h2>From chassis to sensing.</h2></div></div><div class="experience-grid"><article class="experience"><h3>What I worked on</h3><p>Assembled the chassis, motors, motor controllers, and power components; brought up the Raspberry Pi and camera; integrated ultrasonic sensors; and connected camera processing to robot movement.</p></article><article class="experience"><h3>What I learned</h3><p>Learned Raspberry Pi development, Python, breadboard wiring, and soldering. The main integration challenge was turning camera detections into motor-control decisions, with guidance from a BSE peer.</p></article></div><p class="rover-note">This is an archived 2023 prototype. The final write-up describes color aversion, while the posted code includes approach and alignment behavior. The demos and original source document that stage of the project.</p></section><section id="demos"><div class="section-head"><div><div class="section-label">PROJECT / DEMONSTRATIONS</div><h2>Three milestones.</h2></div></div><div class="experience-grid"><article class="experience"><div class="date">FINAL MILESTONE</div><h3>Integrated rover demonstration</h3><p>The final project write-up describes integrating camera-based color detection with an aversion response.</p><div class="video"><iframe loading="lazy" src="https://www.youtube.com/embed/vanUqOjm1lM" title="Integrated rover demonstration" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><a href="https://www.youtube.com/watch?v=vanUqOjm1lM">Watch on YouTube</a></p></article><article class="experience"><div class="date">MILESTONE 2</div><h3>Camera tracking and sensor integration</h3><p>Tested red-object tracking, mounted three additional ultrasonic sensors, and added a USB-C power bank. Aversion logic was still planned at this checkpoint.</p><div class="video"><iframe loading="lazy" src="https://www.youtube.com/embed/mivj2erSktc" title="Camera tracking and sensor integration" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><a href="https://www.youtube.com/watch?v=mivj2erSktc">Watch on YouTube</a></p></article><article class="experience"><div class="date">MILESTONE 1</div><h3>Chassis and camera bring-up</h3><p>Assembled the Raspberry Pi and onboard camera; captured a photo and video; assembled the wheels, motors, controllers, battery holder, and power switch.</p><div class="video"><iframe loading="lazy" src="https://www.youtube.com/embed/J_ZyX7TFdRQ" title="Chassis and camera bring-up" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><a href="https://www.youtube.com/watch?v=J_ZyX7TFdRQ">Watch on YouTube</a></p></article></div></section><section><div class="section-head"><div><div class="section-label">PROJECT / COMPONENTS</div><h2>Bill of materials.</h2></div></div><table class="rover-table"><thead><tr><th>Component</th><th>Role</th></tr></thead><tbody><tr><td>Raspberry Pi</td><td>Onboard computer</td></tr><tr><td>L9110 motor controller</td><td>Motor direction and drive control</td></tr><tr><td>HC-SR04 ultrasonic sensors</td><td>Proximity sensing</td></tr><tr><td>Arducam / Raspberry Pi camera</td><td>Color detection</td></tr><tr><td>Smart car chassis kit</td><td>Chassis, wheels, and motors</td></tr><tr><td>Jumper wires and breadboards</td><td>Prototype connections</td></tr><tr><td>USB-C power bank</td><td>Secondary power supply</td></tr></tbody></table></section><section id="source"><div class="section-head"><div><div class="section-label">PROJECT / PYTHON</div><h2>Inside the rover.</h2></div></div><p>The archived source uses PiCamera, OpenCV, NumPy, and RPi.GPIO for image segmentation, contour detection, ultrasonic readings, and motor commands.</p><div class="actions"><a class="btn" href="assets/bse/rover-source.txt" download>Download original source</a><a href="https://github.com/Zeinork/Wynton_BSE_Portfolio">Original repository</a><a href="https://zeinork.github.io/Wynton_BSE_Portfolio/">Original project page</a></div><details><summary>Read archived source</summary><pre class="source"><code># Disclaimer, the majority of the code was derived from Omeed, please see link below in page for his page
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Wynton Zhang's Dingo rover: Raspberry Pi vision, ultrasonic sensing, and three project demonstrations.">
+  <meta name="theme-color" content="#121417">
+  <title>Dingo Rover — Wynton Zhang</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="signal.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-head">
+    <div class="wrap head-grid">
+      <a class="identity" href="index.html" aria-label="Wynton Zhang, home"><img src="assets/mark.svg" width="36" height="36" alt=""><span>Wynton Zhang<small>Engineering portfolio</small></span></a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html#projects"><span>01</span> Work</a><a href="index.html#code"><span>02</span> Code</a><a href="index.html#experience"><span>03</span> Experience</a><a href="bse-rover.html" aria-current="page">BSE Rover</a>
+      </nav>
+      <a class="button head-action" href="index.html#contact">Resume &amp; contact <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a>
+    </div>
+  </header>
+  <main id="main">
+    <section class="wrap rover-hero" aria-labelledby="rover-title">
+      <div>
+        <p class="kicker"><span>23</span> BLUESTAMP ENGINEERING / 2023</p>
+        <h1 id="rover-title">Dingo <span>rover.</span></h1>
+        <p>A Raspberry Pi rover that uses a camera to detect colored objects and ultrasonic sensors to measure proximity.</p>
+        <div class="actions"><a class="button primary" href="#demos">Watch the demos <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 4l8 8M5 12h7V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a><a class="button outline" href="#source">Browse the source <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 4l8 8M5 12h7V5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div>
+      </div>
+      <aside class="rover-brief" aria-label="Rover project overview">
+        <div class="card-head mono"><span>PROJECT RECORD</span><span>2023</span></div>
+        <h2>Hardware integration</h2>
+        <dl>
+          <div><dt>Controller</dt><dd>Raspberry Pi</dd></div>
+          <div><dt>Vision</dt><dd>Arducam + OpenCV</dd></div>
+          <div><dt>Ranging</dt><dd>Ultrasonic sensors</dd></div>
+          <div><dt>Motion</dt><dd>DC motors + driver</dd></div>
+        </dl>
+      </aside>
+    </section>
+    <div class="field-band"><div class="wrap mono band-grid"><strong>Project archive <span aria-hidden="true">///</span></strong><span>01 · Bring-up</span><span>02 · Tracking</span><span>03 · Integration</span><b class="index-mark" aria-hidden="true"></b></div></div>
+    <section class="wrap section" id="demos" aria-labelledby="demos-title">
+      <div class="section-head"><div><p class="kicker"><span>01</span> DEMONSTRATIONS</p><h2 id="demos-title">Three milestones<span>.</span></h2></div><p>I assembled the chassis and electronics and adapted camera processing to send motor commands. These recordings follow that integration.</p></div>
+      <div class="project-grid rover-grid">
+        <article class="project"><div class="card-head mono"><span>03 / FINAL</span><span>VIDEO</span></div>
+          <div class="video-box"><iframe src="https://www.youtube-nocookie.com/embed/vanUqOjm1lM" title="Final integrated rover demonstration" loading="lazy" allow="picture-in-picture; encrypted-media" allowfullscreen></iframe></div>
+          <div class="project-body"><h3>Integrated rover</h3><p>The final write-up describes combining camera detection with an aversion response.</p><a href="https://www.youtube.com/watch?v=vanUqOjm1lM">Watch on YouTube <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div>
+        </article>
+        <article class="project"><div class="card-head mono"><span>02 / TRACKING</span><span>VIDEO</span></div>
+          <div class="video-box"><iframe src="https://www.youtube-nocookie.com/embed/mivj2erSktc" title="Camera tracking and sensor integration demonstration" loading="lazy" allow="picture-in-picture; encrypted-media" allowfullscreen></iframe></div>
+          <div class="project-body"><h3>Camera &amp; sensors</h3><p>Tested color tracking, mounted additional ultrasonic sensors, and added a secondary power bank.</p><a href="https://www.youtube.com/watch?v=mivj2erSktc">Watch on YouTube <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div>
+        </article>
+        <article class="project"><div class="card-head mono"><span>01 / BRING-UP</span><span>VIDEO</span></div>
+          <div class="video-box"><iframe src="https://www.youtube-nocookie.com/embed/J_ZyX7TFdRQ" title="Chassis and camera bring-up demonstration" loading="lazy" allow="picture-in-picture; encrypted-media" allowfullscreen></iframe></div>
+          <div class="project-body"><h3>Chassis bring-up</h3><p>Assembled the Raspberry Pi, camera, motors, drivers, and power hardware, then tested image capture.</p><a href="https://www.youtube.com/watch?v=J_ZyX7TFdRQ">Watch on YouTube <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div>
+        </article>
+      </div>
+    </section>
+    <section class="section light" aria-labelledby="parts-title">
+      <div class="wrap">
+        <div class="section-head"><div><p class="kicker"><span>02</span> COMPONENTS</p><h2 id="parts-title">Parts list<span>.</span></h2></div></div>
+        <ul class="parts"><li>Raspberry Pi</li><li>Arducam camera</li><li>HC-SR04 ultrasonic sensors</li><li>L9110 motor controller</li><li>Chassis, wheels, and DC motors</li><li>Jumper wires and breadboards</li><li>USB-C power bank</li></ul>
+      </div>
+    </section>
+    <section class="wrap section" id="source" aria-labelledby="source-title">
+      <div class="section-head"><div><p class="kicker"><span>03</span> PYTHON</p><h2 id="source-title">Inside the rover<span>.</span></h2></div><p>The archived code uses PiCamera, OpenCV, NumPy, and RPi.GPIO for color segmentation, distance readings, and motor control.</p></div>
+      <div class="actions"><a class="button primary" href="assets/bse/rover-source.txt" download>Download archived source <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M8 3v10m-4-4 4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a><a class="button outline" href="https://github.com/Zeinork/Wynton_BSE_Portfolio">Original repository <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div>
+      <details class="source-box"><summary>Read archived source</summary><pre tabindex="0"><code># Disclaimer, the majority of the code was derived from Omeed, please see link below in page for his page
 #Packages
 from picamera.array import PiRGBArray    
 from picamera import PiCamera
@@ -326,27 +361,9 @@ GPIO.cleanup() #free all the GPIO pins
 
 
 
-}</code></pre></details></section></main><footer><div class="wrap"><p>Wynton Zhang · <a href="index.html">Main portfolio</a> · <a href="mailto:wlz@duke.edu">wlz@duke.edu</a></p></div></footer><script>
-(() => {
-  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (preference.matches || !('IntersectionObserver' in window)) return;
-  const targets = Array.from(document.querySelectorAll('main section')).filter(el => el.getBoundingClientRect().top > window.innerHeight);
-  const show = el => { el.classList.add('motion-shown'); el.classList.remove('motion-pending'); };
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => { if (entry.isIntersecting) { show(entry.target); observer.unobserve(entry.target); } });
-  }, {threshold: 0, rootMargin: '0px 0px -24px 0px'});
-  targets.forEach(el => { el.classList.add('motion-reveal', 'motion-pending'); observer.observe(el); });
-  const revealHash = () => {
-    if (!location.hash) return;
-    let target;
-    try { target = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch { return; }
-    const section = target && (target.matches('section') ? target : target.closest('section'));
-    if (section) { show(section); observer.unobserve(section); }
-  };
-  window.addEventListener('hashchange', revealHash);
-  document.addEventListener('focusin', event => { const section = event.target.closest('section'); if (section) { show(section); observer.unobserve(section); } });
-  preference.addEventListener('change', event => { if(event.matches){targets.forEach(show);observer.disconnect();} });
-  revealHash();
-})();
-</script>
-</body></html>
+}</code></pre></details>
+    </section>
+  </main>
+  <footer class="foot rover-foot"><div class="wrap mono"><span>© 2026 Wynton Zhang</span><a href="index.html">Back to portfolio <span class="icon" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none"><path d="M4 12 12 4M5 4h7v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg></span></a></div></footer>
+</body>
+</html>
