@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Selected source files from Wynton Zhang's engineering portfolio."><title>Processor components — Wynton Zhang</title><link rel="icon" href="../../assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="../../signal.css"></head><body><a class="skip" href="#main">Skip to content</a><header class="site-head"><div class="wrap head-grid"><a class="identity" href="../../index.html" aria-label="Wynton Zhang, home"><img src="../../assets/mark.svg" width="36" height="36" alt=""><span>Wynton Zhang<small>Engineering portfolio</small></span></a><nav class="nav" aria-label="Main navigation"><a href="../../index.html#projects">Work</a><a href="../../index.html#code" aria-current="page">Code</a><a href="../../index.html#experience">Experience</a><a href="../../bse-rover.html">BSE Rover</a></nav><a class="button head-action" href="../../index.html#contact">Resume &amp; contact</a></div></header><main id="main" class="wrap section"><div class="section-head"><div><p class="kicker"><span>02</span> VERILOG / RTL</p><h2>Processor components<span>.</span></h2></div><p>Earlier Verilog checkpoints for the ALU, register file, and multiplier. These files predate the integrated CPU.</p></div><div class="actions"><a class="button primary" href="../../assets/code/digital-hardware-samples.zip" download>Download samples (ZIP)</a><a class="button outline" href="../../index.html#code">Back to source samples</a></div><details class="source-box"><summary>README.md</summary><pre tabindex="0"><code># Wynton Zhang — Digital hardware code samples
+
+Selected RTL from Duke ECE 350 coursework. This package preserves the uploaded implementation and excludes supplied flip-flop primitives, course testbenches, assignment material, and generated simulation binaries.
+
+## Contents
+- alu/: 32-bit structural ALU, hierarchical carry-lookahead arithmetic, barrel shifters, and flag logic.
+- regfile/: dual-read, single-write 32 x 32 register file.
+- multdiv/: EARLY multiplication-only checkpoint; division is unimplemented and signed exception handling is unfinished in this archived version.
+
+## Dependencies and verification
+The register file and multiplier require dffe_ref, a course-provided flip-flop module not redistributed here. Obtain a compatible flip-flop dependency through your own environment. The package is source for inspection, not a self-contained runnable project.
+
+Saved register-file evidence in the original archive reported 34,096 cases with zero errors. No board implementation or timing result is claimed. The full CPU remains in progress.
+
+Project samples were selected from the student&#x27;s uploaded files. Publication is not a claim of authorship of the course framework or provided modules.
+</code></pre></details><details class="source-box"><summary>alu/and_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module and_32(A,B,result);
+input [31:0] A,B;
+output [31:0] result;
+
+genvar i;
+
+generate
+    for (i=0 ; i&lt;32; i=i+1 ) begin : and_bits
+        and and_gate(result[i], A[i], B[i]);
+    end
+endgenerate
+endmodule</code></pre></details><details class="source-box"><summary>alu/cla_8.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+module cla_8(A,B, Cin, Sum, P, G);
+//8 bit carry look ahead adder
+
+input [7:0] A, B;
+input Cin;
+
+output [7:0] Sum;
+output P, G;
+
+wire [7:0] p, g;
+wire [7:0] c; //c[i], carry entering bit i
+wire c1_term;
+
+wire c2_term1, c2_term2;
+
+wire c3_term1, c3_term2, c3_term3;
+
+wire c4_term1, c4_term2, c4_term3, c4_term4;
+
+wire c5_term1, c5_term2, c5_term3, c5_term4, c5_term5;
+
+wire c6_term1, c6_term2, c6_term3, c6_term4, c6_term5, c6_term6;
+
+wire c7_term1, c7_term2, c7_term3, c7_term4, c7_term5, c7_term6, c7_term7;
+
+wire G_term1, G_term2, G_term3, G_term4, G_term5, G_term6, G_term7;
+
+assign c[0] = Cin;
+
+
+g_propogate gp0(.a(A[0]), .b(B[0]), .g(g[0]), .p(p[0]));
+g_propogate gp1(.a(A[1]), .b(B[1]), .g(g[1]), .p(p[1]));
+g_propogate gp2(.a(A[2]), .b(B[2]), .g(g[2]), .p(p[2]));
+g_propogate gp3(.a(A[3]), .b(B[3]), .g(g[3]), .p(p[3]));
+g_propogate gp4(.a(A[4]), .b(B[4]), .g(g[4]), .p(p[4]));
+g_propogate gp5(.a(A[5]), .b(B[5]), .g(g[5]), .p(p[5]));
+g_propogate gp6(.a(A[6]), .b(B[6]), .g(g[6]), .p(p[6]));
+g_propogate gp7(.a(A[7]), .b(B[7]), .g(g[7]), .p(p[7]));
+
+//carry equations
+and c1_and(c1_term, p[0], Cin);
+or c1_or(c[1],g[0],c1_term);
+
+and c2_and1(c2_term1, p[1], g[0]);
+and c2_and2(c2_term2, p[1], p[0], Cin);
+or c2_or(c[2],g[1], c2_term1, c2_term2);
+
+and c3_and1(c3_term1, p[2], g[1]);
+and c3_and2(c3_term2, p[2], p[1], g[0]);
+and c3_and3(c3_term3, p[2], p[1], p[0], Cin);
+or  c3_or(c[3],g[2], c3_term1, c3_term2, 
+c3_term3);
+
+and c4_and1(c4_term1, p[3], g[2]);
+and c4_and2(c4_term2, p[3], p[2], g[1]);
+and c4_and3(c4_term3, p[3], p[2], p[1], g[0]);
+and c4_and4(c4_term4, p[3], p[2], p[1], p[0], Cin);
+or  c4_or(c[4],g[3], c4_term1, c4_term2, 
+c4_term3, c4_term4);
+
+and c5_and1(c5_term1, p[4], g[3]);
+and c5_and2(c5_term2, p[4], p[3], g[2]);
+and c5_and3(c5_term3, p[4], p[3], p[2], g[1]);
+and c5_and4(c5_term4, p[4], p[3], p[2], p[1], g[0]);
+and c5_and5(c5_term5, p[4], p[3], p[2], p[1], p[0], Cin);
+or  c5_or(c[5],g[4], c5_term1, c5_term2, 
+c5_term3, c5_term4, c5_term5);
+
+and c6_and1(c6_term1, p[5], g[4]);
+and c6_and2(c6_term2, p[5], p[4], g[3]);
+and c6_and3(c6_term3, p[5], p[4], p[3], g[2]);
+and c6_and4(c6_term4, p[5], p[4], p[3], p[2], g[1]);
+and c6_and5(c6_term5, p[5], p[4], p[3], p[2], p[1], g[0]);
+and c6_and6(c6_term6, p[5], p[4], p[3], p[2], p[1], p[0], Cin);
+or  c6_or(c[6],g[5], c6_term1, c6_term2, 
+c6_term3, c6_term4, c6_term5, c6_term6);
+
+and c7_and1(c7_term1, p[6], g[5]);
+and c7_and2(c7_term2, p[6], p[5], g[4]);
+and c7_and3(c7_term3, p[6], p[5], p[4], g[3]);
+and c7_and4(c7_term4, p[6], p[5], p[4], p[3], g[2]);
+and c7_and5(c7_term5, p[6], p[5], p[4], p[3], p[2], g[1]);
+and c7_and6(c7_term6, p[6], p[5], p[4], p[3], p[2], p[1], g[0]);
+and c7_and7(c7_term7, p[6], p[5], p[4], p[3], p[2], p[1], p[0], Cin);
+or  c7_or(c[7],g[6], c7_term1, c7_term2, 
+c7_term3, c7_term4, c7_term5, c7_term6, c7_term7);
+
+//sum bits
+xor sum0(Sum[0], p[0], c[0]);
+xor sum1(Sum[1], p[1], c[1]);
+xor sum2(Sum[2], p[2], c[2]);
+xor sum3(Sum[3], p[3], c[3]);
+xor sum4(Sum[4], p[4], c[4]);
+xor sum5(Sum[5], p[5], c[5]);
+xor sum6(Sum[6], p[6], c[6]);
+xor sum7(Sum[7], p[7], c[7]);
+//incoming carry through
+and group_p(P, p[7], p[6], p[5], p[4], p[3], p[2], p[1], p[0]);
+//outgoing carry, INDEPENDENT OF Cin
+and G_and1(G_term1, p[7], g[6]);
+
+and G_and2(G_term2, p[7], p[6], g[5]);
+
+and G_and3(G_term3, p[7], p[6], p[5], g[4]);
+
+and G_and4(G_term4, p[7], p[6], p[5], p[4], g[3]);
+
+and G_and5(G_term5, p[7], p[6], p[5], p[4], p[3], g[2]);
+
+and G_and6(G_term6, p[7], p[6], p[5], p[4], p[3], p[2], g[1]);
+
+and G_and7(G_term7, p[7], p[6], p[5], p[4], p[3], p[2], p[1], g[0]);
+
+or group_g(G, g[7], G_term1, G_term2, G_term3, 
+G_term4, G_term5, G_term6, G_term7);
+endmodule</code></pre></details><details class="source-box"><summary>alu/sra_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module sra_32(A, shiftamt, result);
+
+input [31:0] A;
+input [4:0] shiftamt;
+
+output [31:0] result;
+
+wire [31:0] stage1, stage2, stage4, stage8;
+
+wire sign_bit;
+
+assign sign_bit = A[31];
+
+//optionally shift right by 1.
+assign stage1 = shiftamt[0]
+    ? {sign_bit, A[31:1]}
+    : A;
+
+
+//optionally shift right by 2.
+assign stage2 = shiftamt[1]
+    ? {{2{sign_bit}}, stage1[31:2]}
+    : stage1;
+
+assign stage4 = shiftamt[2]
+    ? {{4{sign_bit}}, stage2[31:4]}
+    : stage2;
+
+assign stage8 = shiftamt[3]
+    ? {{8{sign_bit}}, stage4[31:8]}
+    : stage4;
+
+assign result = shiftamt[4]
+    ? {{16{sign_bit}}, stage8[31:16]}
+    : stage8;
+
+endmodule</code></pre></details><details class="source-box"><summary>alu/alu_flags.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module alu_flags(A,B,sub,result,overflow,isNotEqual,isLessThan);
+
+input [31:0] A, B;
+input sub;
+input [31:0] result;
+
+output overflow;
+output isNotEqual;
+output isLessThan;
+
+wire signs_different;
+wire signs_adjusted;
+wire overflow_w;
+wire result_sign_different;
+
+//signed overflow for addition and subtraction
+xor signs_xor(signs_different, A[31], B[31]);
+xor mode_xor(signs_adjusted, signs_different, sub);
+not sign_not(overflow_w, signs_adjusted);
+xor result_xor(result_sign_different, A[31], result[31]);
+and overflow_and(overflow,overflow_w, result_sign_different);
+
+//Nonzero subtraction result (A != B)
+or not_equal_or(isNotEqual,
+        result[0],  result[1],  result[2],  result[3],result[4],  result[5],  
+        result[6],  result[7], result[8],  result[9],  result[10], result[11],
+        result[12], result[13], result[14], result[15], result[16], result[17], 
+        result[18], result[19], result[20], result[21], result[22], result[23],
+        result[24], result[25], result[26], result[27],result[28], result[29], 
+        result[30], result[31]);
+
+//signed less-than, subtraction signs for overflow
+xor less_than_xor(isLessThan, result[31], overflow);
+endmodule</code></pre></details><details class="source-box"><summary>alu/sll_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module sll_32(A, shiftamt, result);
+
+input [31:0] A;
+input [4:0] shiftamt;
+
+output [31:0] result;
+
+wire [31:0] stage1, stage2, stage4, stage8;
+
+//optionally shift left by 1.
+assign stage1 = shiftamt[0]
+    ? {A[30:0], 1&#x27;b0}
+    : A;
+
+//optionally shift the previous result left by 2.
+assign stage2 = shiftamt[1]
+    ? {stage1[29:0], 2&#x27;b0}
+    : stage1;
+
+assign stage4 = shiftamt[2]
+    ? {stage2[27:0], 4&#x27;b0}
+    : stage2;
+
+assign stage8 = shiftamt[3]
+    ? {stage4[23:0], 8&#x27;b0}
+    : stage4;
+
+assign result = shiftamt[4]
+    ? {stage8[15:0], 16&#x27;b0}
+    : stage8;
+endmodule</code></pre></details><details class="source-box"><summary>alu/add_sub_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module add_sub_32(A,B,sub,result);
+
+input [31:0] A,B;
+input sub;
+
+output [31:0] result;
+
+wire[31:0] B_modified;
+wire carry_out;
+
+//invert each bit of B (if its a subtract operation)
+genvar i;
+
+generate
+    for (i = 0; i &lt; 32; i = i + 1) begin : invert_bits
+        xor invert_gate(B_modified[i], B[i], sub);
+    end
+endgenerate
+
+//shared adder for addition and subtraction
+cla_32 adder(.A(A), .B(B_modified), .Cin(sub), .Sum(result), .Cout(carry_out));
+
+endmodule</code></pre></details><details class="source-box"><summary>alu/or_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module or_32(A, B, result);
+
+    input [31:0] A, B;
+    output [31:0] result;
+
+    genvar i;
+
+    generate
+        for (i = 0; i &lt; 32; i = i + 1) begin : or_bits
+            or or_gate(result[i], A[i], B[i]);
+        end
+    endgenerate
+
+endmodule</code></pre></details><details class="source-box"><summary>alu/cla_32.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+
+module cla_32(A,B,Cin,Sum,Cout);
+
+input[31:0] A, B;
+input Cin;
+
+output [31:0] Sum;
+output Cout;
+
+wire[3:0] block_P, block_G;
+wire c8,c16,c24;
+
+wire c8_term1;
+
+wire c16_term1, c16_term2;
+
+wire c24_term1, c24_term2, c24_term3;
+
+wire c32_term1, c32_term2, c32_term3, c32_term4;
+
+cla_8 block0(.A(A[7:0]), .B(B[7:0]), .Cin(Cin), 
+.Sum(Sum[7:0]), .P(block_P[0]), .G(block_G[0]));
+
+cla_8 block1(.A(A[15:8]), .B(B[15:8]), .Cin(c8), 
+.Sum(Sum[15:8]), .P(block_P[1]), .G(block_G[1]));
+
+cla_8 block2(.A(A[23:16]), .B(B[23:16]), .Cin(c16), 
+.Sum(Sum[23:16]), .P(block_P[2]), .G(block_G[2]));
+
+cla_8 block3(.A(A[31:24]), .B(B[31:24]), .Cin(c24), 
+.Sum(Sum[31:24]), .P(block_P[3]), .G(block_G[3]));
+
+//this again....
+and c8_and1(c8_term1, block_P[0], Cin);
+or c8_or(c8, block_G[0], c8_term1);
+
+and c16_and1(c16_term1, block_P[1], block_G[0]);
+and c16_and2(c16_term2, block_P[1], block_P[0], Cin);
+or c16_or(c16, block_G[1], c16_term1, c16_term2);
+
+and c24_and1(c24_term1, block_P[2], block_G[1]);
+and c24_and2(c24_term2, block_P[2], block_P[1], block_G[0]);
+and c24_and3(c24_term3, block_P[2], block_P[1], block_P[0], Cin);
+or c24_or(c24, block_G[2], c24_term1, c24_term2, c24_term3);
+
+and c32_and1(c32_term1, block_P[3], block_G[2]);
+and c32_and2(c32_term2, block_P[3], block_P[2], block_G[1]);
+and c32_and3(c32_term3, block_P[3], block_P[2], block_P[1], block_G[0]);
+and c32_and4(c32_term4, block_P[3], block_P[2], block_P[1], block_P[0], Cin);
+or c32_or(Cout, block_G[3], c32_term1, c32_term2, c32_term3, c32_term4);
+
+endmodule</code></pre></details><details class="source-box"><summary>alu/g_propogate.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+module g_propogate(a,b,g,p);
+
+input a,b;
+output g,p;
+
+and g1(g,a,b);
+xor x1(p,a,b);
+
+endmodule</code></pre></details><details class="source-box"><summary>alu/alu.v</summary><pre tabindex="0"><code>`timescale 1ns/1ps
+module alu(data_operandA, data_operandB, ctrl_ALUopcode, ctrl_shiftamt, 
+data_result, isNotEqual, isLessThan, overflow);
+        
+    input [31:0] data_operandA, data_operandB;
+    input [4:0] ctrl_ALUopcode, ctrl_shiftamt;
+
+    output [31:0] data_result;
+    output isNotEqual, isLessThan, overflow;
+
+wire [31:0] arithmetic_result, 
+and_result, or_result, 
+sll_result, sra_result;
+
+wire sub;
+
+wire [31:0] logic_result, shift_result, arithmetic_or_logic;
+
+//add,sub control
+//ADD opcode ends in 0, SUB opcode ends in 1
+assign sub = ctrl_ALUopcode[0];
+
+//arithmetic unit
+add_sub_32 arithmetic_unit(.A(data_operandA), .B(data_operandB),
+.sub(sub), .result(arithmetic_result));
+
+//flags
+alu_flags flags_unit(.A(data_operandA), .B(data_operandB),
+.sub(sub), .result(arithmetic_result), .overflow(overflow),
+.isNotEqual(isNotEqual), .isLessThan(isLessThan));
+
+//bitwise logic
+and_32 and_unit(.A(data_operandA), .B(data_operandB),
+ .result(and_result));
+
+or_32 or_unit(.A(data_operandA), .B(data_operandB),
+ .result(or_result));
+//shifters
+sll_32 sll_unit(.A(data_operandA), 
+.shiftamt(ctrl_shiftamt),
+ .result(sll_result));
+
+ sra_32 sra_unit(.A(data_operandA), 
+ .shiftamt(ctrl_shiftamt),
+ .result(sra_result));
+
+//result selection muxs
+assign logic_result = ctrl_ALUopcode[0]
+    ? or_result
+    : and_result;
+
+assign shift_result = ctrl_ALUopcode[0]
+    ? sra_result
+    : sll_result;
+
+assign arithmetic_or_logic = ctrl_ALUopcode[1]
+    ? logic_result
+    : arithmetic_result;
+
+assign data_result = ctrl_ALUopcode[2]
+    ? shift_result
+    : arithmetic_or_logic;
+endmodule</code></pre></details><details class="source-box"><summary>regfile/register_32.v</summary><pre tabindex="0"><code>module register_32(
+    input clock,
+    input reset,
+    input enable,
+    input [31:0] data_in,
+    output [31:0] data_out
+);
+
+    genvar bit_index;
+
+    generate
+        for (bit_index = 0; bit_index &lt; 32;
+             bit_index = bit_index + 1) begin : bits
+            //   flip-flop data input  -&gt; data_in[bit_index]
+            //   flip-flop output      -&gt; data_out[bit_index]
+            //   flip-flop clock       -&gt; clock
+            //   flip-flop enable      -&gt; enable
+            //   flip-flop clear/reset -&gt; reset
+
+            dffe_ref bit_storage(
+            .q(data_out[bit_index]), 
+            .d(data_in[bit_index]),
+            .clk(clock),
+            .en(enable),
+            .clr(reset)
+            );
+
+
+        end
+    endgenerate
+
+endmodule</code></pre></details><details class="source-box"><summary>regfile/decoder_32.v</summary><pre tabindex="0"><code>module decoder_32(
+    input [4:0] select,
+    input enable,
+    output [31:0] out
+);
+    // Start with enable represented as a 32-bit value,
+    // then shift it left by select.
+
+    assign out = {31&#x27;b0, enable} &lt;&lt; select;
+endmodule</code></pre></details><details class="source-box"><summary>regfile/tristate_32.v</summary><pre tabindex="0"><code>module tristate_32(
+    input [31:0] data_in,
+    input enable,
+    output [31:0] data_out
+);
+
+    // The high-impedance constant is: 32&#x27;bz
+    assign data_out = enable? data_in : 32&#x27;bz;
+endmodule</code></pre></details><details class="source-box"><summary>regfile/regfile.v</summary><pre tabindex="0"><code>module regfile (
+	clock,
+	ctrl_writeEnable, ctrl_reset, ctrl_writeReg,
+	ctrl_readRegA, ctrl_readRegB, data_writeReg,
+	data_readRegA, data_readRegB
+);
+
+	input clock, ctrl_writeEnable, ctrl_reset;
+	input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+	input [31:0] data_writeReg;
+
+	output [31:0] data_readRegA, data_readRegB;
+
+	// add your code here
+	wire[31:0] write_select;
+	wire[31:0] read_a;
+	wire[31:0] read_b;
+
+	//decode which register to write
+	decoder_32 write_decoder(
+		.select(ctrl_writeReg),
+		.enable(ctrl_writeEnable),
+		.out(write_select)
+	);
+
+	//decoder which registers to write for port A and B
+	decoder_32 read_decoder_a(
+		.select(ctrl_readRegA),
+		.enable(1&#x27;b1),
+		.out(read_a)
+	);
+		decoder_32 read_decoder_b(
+		.select(ctrl_readRegB),
+		.enable(1&#x27;b1),
+		.out(read_b)
+	);
+
+	//register 0
+	tristate_32 zero_read_a(
+		.data_in(32&#x27;b0),
+		.enable(read_a[0]),
+		.data_out(data_readRegA)
+	);
+	tristate_32 zero_read_b(
+		.data_in(32&#x27;b0),
+		.enable(read_b[0]),
+		.data_out(data_readRegB)
+	);
+
+genvar r;
+generate
+	for(r = 1; r&lt;32; r =r+1) begin : registers
+	wire[31:0] stored_data;
+	register_32 stor(
+		.clock(clock),
+		.reset(ctrl_reset),
+		.enable(write_select[r]),
+		.data_in(data_writeReg),
+		.data_out(stored_data)
+	);
+	tristate_32 read_buffer_a(
+		.data_in(stored_data),
+		.enable(read_a[r]),
+		.data_out(data_readRegA)
+	);
+	tristate_32 read_buffer_b(
+		.data_in(stored_data),
+		.enable(read_b[r]),
+		.data_out(data_readRegB)
+	);
+	end
+endgenerate
+
+endmodule
+</code></pre></details><details class="source-box"><summary>multdiv/md_register.v</summary><pre tabindex="0"><code>module md_register #(parameter WIDTH = 32)(
+    input [WIDTH-1:0] d,
+    input clock,
+    input enable,
+    output [WIDTH-1:0] q
+);
+
+    genvar i;
+    generate
+        for (i = 0; i &lt; WIDTH; i = i + 1) begin: bits
+            dffe_ref ff(
+                .q(q[i]),
+                .d(d[i]),
+                .clk(clock),
+                .en(enable),
+                .clr(1&#x27;b0)
+            );
+        end
+    endgenerate
+
+endmodule</code></pre></details><details class="source-box"><summary>multdiv/multdiv.v</summary><pre tabindex="0"><code>module multdiv(
+    data_operandA, data_operandB,
+    ctrl_MULT, ctrl_DIV, clock,
+    data_result, data_exception, data_resultRDY
+);
+
+    input [31:0] data_operandA, data_operandB;
+    input ctrl_MULT, ctrl_DIV, clock;
+
+    output [31:0] data_result;
+    output data_exception, data_resultRDY;
+
+    wire start;
+    wire busy, busy_next;
+    wire done;
+    wire update;
+
+    wire [63:0] multiplicand, multiplicand_next;
+    wire [31:0] multiplier, multiplier_next;
+    wire [63:0] product, product_next;
+    wire [63:0] addend, sum;
+
+    wire [4:0] count, count_next, count_plus_one;
+
+    wire exception_next;
+
+    // either control signal cancels the previous operation.
+    // division itself is not implemented yet.
+    assign start = ctrl_MULT | ctrl_DIV;
+
+    // count values 0 through 31 give 32 calculation cycles.
+    assign done = busy &amp; (&amp;count) &amp; ~start;
+
+    assign busy_next =
+        start ? ctrl_MULT :
+        done  ? 1&#x27;b0 :
+                busy;
+
+    assign update = start | busy;
+
+    md_register #(1) busy_reg(
+        .d(busy_next),
+        .clock(clock),
+        .enable(1&#x27;b1),
+        .q(busy)
+    );
+
+    // capture A on start, then shift it left each cycle.
+    assign multiplicand_next =
+        start ? {32&#x27;b0, data_operandA} :
+                {multiplicand[62:0], 1&#x27;b0};
+
+    md_register #(64) multiplicand_reg(
+        .d(multiplicand_next),
+        .clock(clock),
+        .enable(update),
+        .q(multiplicand)
+    );
+
+    // capture B on start, then shift it right each cycle.
+    assign multiplier_next =
+        start ? data_operandB :
+                {1&#x27;b0, multiplier[31:1]};
+
+    md_register #(32) multiplier_reg(
+        .d(multiplier_next),
+        .clock(clock),
+        .enable(update),
+        .q(multiplier)
+    );
+
+    // add the shifted A only when the current B bit is 1.
+    assign addend = multiplier[0] ? multiplicand : 64&#x27;b0;
+
+    md_adder #(64) product_adder(
+        .a(product),
+        .b(addend),
+        .sum(sum)
+    );
+
+    assign product_next = start ? 64&#x27;b0 : sum;
+
+    md_register #(64) product_reg(
+        .d(product_next),
+        .clock(clock),
+        .enable(update),
+        .q(product)
+    );
+
+    // structural cycle counter.
+    md_adder #(5) counter_adder(
+        .a(count),
+        .b(5&#x27;b00001),
+        .sum(count_plus_one)
+    );
+
+    assign count_next = start ? 5&#x27;b0 : count_plus_one;
+
+    md_register #(5) count_reg(
+        .d(count_next),
+        .clock(clock),
+        .enable(update),
+        .q(count)
+    );
+
+    // register ready so it stays high for one full cycle.
+    md_register #(1) ready_reg(
+        .d(done),
+        .clock(clock),
+        .enable(1&#x27;b1),
+        .q(data_resultRDY)
+    );
+
+    // for nonnegative operands, bits 63:31 must all be zero
+    // for the product to fit in a signed 32-bit result.
+    assign exception_next =
+        start ? 1&#x27;b0 :
+        done  ? (|sum[63:31]) :
+                data_exception;
+
+    md_register #(1) exception_reg(
+        .d(exception_next),
+        .clock(clock),
+        .enable(1&#x27;b1),
+        .q(data_exception)
+    );
+
+    assign data_result = product[31:0];
+
+endmodule</code></pre></details><details class="source-box"><summary>multdiv/md_adder.v</summary><pre tabindex="0"><code>module md_adder #(parameter WIDTH = 64)(
+    input [WIDTH-1:0] a,
+    input [WIDTH-1:0] b,
+    output [WIDTH-1:0] sum
+);
+
+    wire [WIDTH:0] carry;
+    assign carry[0] = 1&#x27;b0;
+
+    genvar i;
+    generate
+        for (i = 0; i &lt; WIDTH; i = i + 1) begin: bits
+            assign sum[i] = a[i] ^ b[i] ^ carry[i];
+
+            assign carry[i+1] =
+                (a[i] &amp; b[i]) |
+                ((a[i] ^ b[i]) &amp; carry[i]);
+        end
+    endgenerate
+
+endmodule</code></pre></details></main><footer class="foot rover-foot"><div class="wrap mono"><span>© 2026 Wynton Zhang</span><a href="../../index.html">Back to portfolio</a></div></footer></body></html>
